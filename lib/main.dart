@@ -57,14 +57,15 @@ class _MyHomePageState extends State<MyHomePage> {
 Route _createRoute() {
   return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => Page2(),
-      transitionsBuilder: (context, aimation, secondaryAnimation, child) {
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
         var begin = Offset(0.0, 1.0);
         var end = Offset.zero;
         var curve = Curves.ease;
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var curveAnimation = CurvedAnimation(parent: animation, curve: curve);
+
+        var tween = Tween(begin: begin, end: end);
         return SlideTransition(
-          position: aimation.drive(tween),
+          position: tween.animate(curveAnimation),
           child: child,
         );
       });
