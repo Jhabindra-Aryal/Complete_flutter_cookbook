@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 void main() {
   runApp(MyApp());
@@ -7,102 +9,88 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final title = 'Fade in images';
+
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      title: title,
+      home: Home(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
-
-  final String? title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title!),
-      ),
-      body: Center(
-          child: InkWell(
-        onTap: () => Navigator.of(context).push(_createRoute()),
-        child: Container(
-          height: 200,
-          width: 200,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.green, Colors.yellow]),
-            border: Border.all(color: Colors.black, width: 2),
-            borderRadius: BorderRadius.circular(10.0),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Home'),
           ),
-        ),
-      )),
-    );
-  }
-}
-
-//Creating route function for animation
-Route _createRoute() {
-  return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Page2(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        var begin = Offset(0.0, 1.0);
-        var end = Offset.zero;
-        var curve = Curves.ease;
-        var curveAnimation = CurvedAnimation(parent: animation, curve: curve);
-
-        var tween = Tween(begin: begin, end: end);
-        return SlideTransition(
-          position: tween.animate(curveAnimation),
-          child: child,
-        );
-      });
-}
-
-//Secod page to navigate
-class Page2 extends StatefulWidget {
-  @override
-  _Page2State createState() => _Page2State();
-}
-
-class _Page2State extends State<Page2> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: InkWell(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-            height: 200.0,
-            width: 200.0,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.yellow,
-                    Colors.green,
-                  ]),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green,
-                  blurRadius: 2.0,
-                  offset: Offset(0.0, 1.0),
+          drawer: Drawer(
+            child: ListView(
+              children: [
+                DrawerHeader(
+                    child: Center(child: Text('Hello Drawer')),
+                    padding: EdgeInsets.zero,
+                    margin: EdgeInsets.zero,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                    )),
+                ListTile(
+                  title: Text('About Us'),
+                  autofocus: true,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(pageBuilder());
+                  },
+                ),
+                ListTile(
+                  title: Text('Contact Us'),
+                  autofocus: false,
+                  // onTap: () {
+                  //   Navigator.of(context).push(pageBuilder());
+                  // },
+                  onTap: () => Navigator.pop(context),
                 )
               ],
-            )),
+            ),
+          ),
+          body: Center(
+            child: FadeInImage.memoryNetwork(
+              placeholder: kTransparentImage,
+              image: 'https://picsum.photos/250?image=9',
+            ),
+          ),
+        ),
       ),
+    );
+  }
+}
+
+Route pageBuilder() {
+  return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) {
+    return AboutUs();
+  }, transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    var begin = Offset(1.0, 1.0);
+    var end = Offset.zero;
+    var tween =
+        Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.ease));
+    return SlideTransition(
+      position: animation.drive(tween),
+      child: child,
+    );
+  });
+}
+
+class AboutUs extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('About Us'),
     );
   }
 }
